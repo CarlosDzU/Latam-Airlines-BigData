@@ -1,0 +1,3 @@
+# Copiar como terraform.tfvars y completar con datos reales (terraform.tfvars no se sube a git).
+owner        = "nombre-del-responsable"
+alert_emails = ["correo@ejemplo.com"]

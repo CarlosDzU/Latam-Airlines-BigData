@@ -1,0 +1,131 @@
+#!/bin/bash
+# Arranque de un nodo (master o worker). Se ejecuta una sola vez, al crear la instancia.
+# Registro completo en /var/log/bootstrap.log
+set -euo pipefail
+exec >>/var/log/bootstrap.log 2>&1
+echo "[arranque] inicio $(date -Is)"
+
+descargar() { curl -fsSL --retry 5 --retry-delay 5 -o "$2" "$1"; }
+REPO_DIR=/home/ec2-user/Latam-Airlines-BigData
+
+# 1. Paquetes del sistema
+dnf install -y java-17-amazon-corretto-headless python3.11 python3.11-pip git
+%{ if es_master ~}
+dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+dnf install -y gh
+%{ endif ~}
+
+# 2. Spark ${spark_version}, verificando el SHA-512 publicado por Apache
+cd /tmp
+descargar "https://archive.apache.org/dist/spark/spark-${spark_version}/spark-${spark_version}-bin-hadoop3.tgz" spark.tgz
+echo "${spark_sha512}  spark.tgz" | sha512sum -c -
+tar -xzf spark.tgz -C /opt
+ln -sfn /opt/spark-${spark_version}-bin-hadoop3 /opt/spark
+rm -f spark.tgz
+
+# Conector para leer y escribir en S3 (versiones compatibles con Spark 3.5), con su SHA-1 de Maven Central
+descargar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar /opt/spark/jars/hadoop-aws-3.3.4.jar
+echo "a65839fbf1869f81a1632e09f415e586922e4f80  /opt/spark/jars/hadoop-aws-3.3.4.jar" | sha1sum -c -
+descargar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar /opt/spark/jars/aws-java-sdk-bundle-1.12.262.jar
+echo "02deec3a0ad83d13d032b1812421b23d7a961eea  /opt/spark/jars/aws-java-sdk-bundle-1.12.262.jar" | sha1sum -c -
+
+mkdir -p /mnt/spark-tmp
+chown -R ec2-user:ec2-user /opt/spark-${spark_version}-bin-hadoop3 /mnt/spark-tmp
+
+# 3. Código del proyecto y sus librerías de Python
+sudo -u ec2-user git clone --branch "${repo_rama}" "${repo_url}" "$REPO_DIR"
+python3.11 -m pip install --quiet -r "$REPO_DIR/requirements.txt"
+
+# 4. Variables de entorno para cualquier sesión
+cat > /etc/profile.d/proyecto.sh <<'VARS'
+export LAKE_BUCKET="${bucket}"
+export AWS_REGION="${region}"
+export AWS_DEFAULT_REGION="${region}"
+export SPARK_HOME=/opt/spark
+export PATH="/opt/spark/bin:/opt/spark/sbin:$PATH"
+export PYSPARK_PYTHON=python3.11
+export PYSPARK_DRIVER_PYTHON=python3.11
+export PYTHONPATH=/home/ec2-user/Latam-Airlines-BigData/src
+VARS
+set +u; . /etc/profile.d/proyecto.sh; set -u
+# Mismas variables en el formato que lee systemd
+sed -e 's/^export //' -e '/^PATH=/d' /etc/profile.d/proyecto.sh > /etc/proyecto.env
+
+# 5. Configuración de Spark
+TOKEN=$(curl -fsS -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 300")
+IP=$(curl -fsS -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/local-ipv4)
+%{ if es_master ~}
+MASTER_IP="$IP"
+%{ else ~}
+MASTER_IP="${master_ip}"
+%{ endif ~}
+
+cat > /opt/spark/conf/spark-defaults.conf <<'CONF'
+${spark_defaults}
+CONF
+sed -i "s/__MASTER_IP__/$MASTER_IP/" /opt/spark/conf/spark-defaults.conf
+
+cat > /opt/spark/conf/spark-env.sh <<ENV
+export SPARK_LOCAL_IP=$IP
+export SPARK_MASTER_HOST=$MASTER_IP
+export SPARK_WORKER_MEMORY=${memoria_worker}
+export SPARK_WORKER_CORES=${executor_cores}
+export SPARK_LOCAL_DIRS=/mnt/spark-tmp
+export PYSPARK_PYTHON=python3.11
+ENV
+chown ec2-user:ec2-user /opt/spark/conf/spark-defaults.conf /opt/spark/conf/spark-env.sh
+
+# 6. Servicios que arrancan solos (también tras un reinicio)
+servicio() {
+  cat > "/etc/systemd/system/$1.service" <<UNIT
+[Unit]
+Description=$2
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=ec2-user
+EnvironmentFile=/etc/proyecto.env
+ExecStart=$3
+ExecStop=$4
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+}
+
+%{ if es_master ~}
+# El History Server necesita que exista la carpeta de eventos en el bucket
+aws s3api put-object --bucket "${bucket}" --key "logs/spark-events/" >/dev/null
+
+servicio spark-master  "Spark master"         /opt/spark/sbin/start-master.sh         /opt/spark/sbin/stop-master.sh
+servicio spark-history "Spark History Server" /opt/spark/sbin/start-history-server.sh /opt/spark/sbin/stop-history-server.sh
+
+# Jupyter escucha solo en 127.0.0.1: únicamente se llega con el túnel de SSM, que exige credenciales de AWS.
+cat > /etc/systemd/system/jupyter.service <<UNIT
+[Unit]
+Description=JupyterLab en 127.0.0.1:8888
+After=network-online.target
+
+[Service]
+User=ec2-user
+EnvironmentFile=/etc/proyecto.env
+WorkingDirectory=$REPO_DIR
+ExecStart=/usr/bin/python3.11 -m jupyterlab --ip=127.0.0.1 --port=8888 --no-browser --ServerApp.token= --ServerApp.password=
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now spark-master spark-history jupyter
+%{ endif ~}
+
+servicio spark-worker "Spark worker" "/opt/spark/sbin/start-worker.sh spark://$MASTER_IP:7077" /opt/spark/sbin/stop-worker.sh
+systemctl daemon-reload
+systemctl enable --now spark-worker
+
+echo "[arranque] listo $(date -Is)"

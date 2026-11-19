@@ -1,0 +1,9 @@
+pyspark==3.5.*
+pyyaml
+boto3
+requests
+pandas
+pyarrow
+matplotlib
+jupyterlab
+pytest
