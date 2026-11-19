@@ -1,0 +1,33 @@
+# Credenciales y llaves
+.env
+*.pem
+.aws/
+
+# Terraform: estado local y variables con datos de la cuenta
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# Datos: solo se versiona la muestra
+data/*
+!data/muestra/
+
+# Python y Jupyter
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.venv/
+
+# Spark local
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Sistema y editores
+.DS_Store
+.vscode/
+.idea/
