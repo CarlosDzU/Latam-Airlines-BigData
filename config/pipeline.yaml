@@ -1,0 +1,81 @@
+# Parámetros del proyecto. Es el único lugar con rutas, periodos, fuentes y umbrales:
+# ningún script tiene estos valores escritos en el código.
+
+# Rutas dentro del bucket (o de data/lake cuando se trabaja en local)
+lake:
+  raiz_local: data/lake
+  tablas:
+    bronze_vra: bronze/anac_vra
+    bronze_bts: bronze/bts
+    bronze_metar: bronze/metar
+    manifiestos: bronze/_manifiestos
+    silver_vuelos: silver/vuelos
+    silver_metar: silver/metar_obs
+    silver_clima_horario: silver/clima_horario
+    silver_calidad: silver/_calidad
+    gold_features: gold/features_salida
+    evidencias: evidencias
+
+# Meses que se procesan y cómo se separan para entrenar y evaluar (nunca al azar)
+periodo:
+  inicio: "2023-01"
+  fin: "2025-12"
+particion_temporal:
+  train_fin: "2024-06"   # train: 2023-01 a 2024-06
+  valid_fin: "2024-12"   # valid: 2024-07 a 2024-12; test: 2025
+
+# El problema: avisar dos horas antes de la salida programada
+horizonte_horas: 2
+umbrales_demora_min:
+  ambar: 15
+  rojo: 60
+
+calidad:
+  demora_min: -60        # demoras fuera de este rango se marcan como atípicas
+  demora_max: 1440
+
+clima:
+  ffill_max_horas: 3     # un METAR se considera vigente hasta 3 horas
+
+# Fuentes de datos
+fuentes:
+  user_agent: "latam-bigdata-academico/1.0"
+
+  vra:
+    entidad: "ANAC, Agência Nacional de Aviação Civil (Brasil)"
+    url_base: "https://sistemas.anac.gov.br/dadosabertos/Voos%20e%20opera%C3%A7%C3%B5es%20a%C3%A9reas/Voo%20Regular%20Ativo%20%28VRA%29"
+    meses_pt: [Janeiro, Fevereiro, Março, Abril, Maio, Junho, Julho, Agosto, Setembro, Outubro, Novembro, Dezembro]
+    separador: ";"
+    zona_horaria: America/Sao_Paulo   # ANAC publica en hora de Brasília, también los vuelos internacionales
+
+  bts:
+    entidad: "Bureau of Transportation Statistics, U.S. Department of Transportation"
+    url: "https://transtats.bts.gov/PREZIP/On_Time_Reporting_Carrier_On_Time_Performance_1987_present_{anio}_{mes}.zip"
+
+  metar:
+    entidad: "Iowa Environmental Mesonet, Iowa State University (archivo ASOS/METAR)"
+    url: "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py"
+    pausa_seg: 6           # pausa entre descargas para no saturar el servicio
+    reintentos: 5
+
+# Empresas del grupo LATAM en VRA (código ICAO). La carga no entra al modelo: no tiene pasajeros.
+latam:
+  pasajeros:
+    TAM: LATAM Airlines Brasil
+    LAN: LATAM Airlines Chile
+    LPE: LATAM Airlines Perú
+    LAP: LATAM Airlines Paraguay
+    ARE: LATAM Airlines Colombia
+    LNE: LATAM Airlines Ecuador
+  carga:
+    LTG: LATAM Cargo Brasil
+    LCO: LATAM Cargo Chile
+
+# Competidores en Brasil, para comparar la puntualidad
+competidores:
+  AZU: Azul
+  GLO: Gol
+
+spark:
+  nombre_app: latam-bigdata
+  particiones_shuffle_local: 8
