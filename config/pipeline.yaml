@@ -8,12 +8,15 @@ lake:
     bronze_vra: bronze/anac_vra
     bronze_bts: bronze/bts
     bronze_metar: bronze/metar
+    bronze_aeropuertos: bronze/ref/aeropuertos
     manifiestos: bronze/_manifiestos
     silver_vuelos: silver/vuelos
     silver_metar: silver/metar_obs
     silver_clima_horario: silver/clima_horario
     silver_calidad: silver/_calidad
     gold_features: gold/features_salida
+    gold_modelos: gold/modelos
+    scale_test: scale-test/vuelos_replica   # réplicas de la prueba de escalabilidad; nunca se usan en el análisis
     evidencias: evidencias
 
 # Meses que se procesan y cómo se separan para entrenar y evaluar (nunca al azar)
@@ -55,8 +58,23 @@ fuentes:
   metar:
     entidad: "Iowa Environmental Mesonet, Iowa State University (archivo ASOS/METAR)"
     url: "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py"
+    url_estacion: "https://mesonet.agron.iastate.edu/api/1/station/{estacion}.json"
     pausa_seg: 6           # pausa entre descargas para no saturar el servicio
     reintentos: 5
+    # Aeropuertos de EE. UU. cuya estación METAR no se encuentra con el código IATA ni con P + IATA
+    codigos_manuales:
+      SJU: TJSJ
+      BQN: TJBQ
+      PSE: TJPS
+      STT: TIST
+      STX: TISX
+      GUM: PGUM
+      SPN: PGSN
+      PPG: NSTU
+    # Zonas horarias que la ficha de IEM trae mal (Islas Vírgenes figura como Atlantic/Bermuda, que sí cambia de hora)
+    zonas_horarias_manuales:
+      STT: America/St_Thomas
+      STX: America/St_Thomas
 
 # Empresas del grupo LATAM en VRA (código ICAO). La carga no entra al modelo: no tiene pasajeros.
 latam:
@@ -75,6 +93,58 @@ latam:
 competidores:
   AZU: Azul
   GLO: Gol
+
+# Variables del modelo (todas conocidas a T-2 h; el notebook 08 verifica que no haya fugas)
+features:
+  min_vuelos_tasa_hist: 30   # vuelos mínimos de train para calcular la tasa histórica por origen y hora
+  numericas:
+    - hora_local
+    - dia_semana
+    - mes
+    - fin_de_semana
+    - congestion_hora
+    - congestion_dia
+    - red_n_salidas
+    - red_demora_media
+    - red_frac_atrasadas
+    - prev_dia_demora
+    - prev_dia_conocido
+    - tasa_hist_origen_hora
+    - clima_disponible
+    - o_viento_kt
+    - o_rafaga_kt
+    - o_visibilidad_m
+    - o_techo_ft
+    - o_temp_c
+    - o_spread_t_td
+    - o_presion_hpa
+    - o_presion_tendencia_3h
+    - o_fen_niebla
+    - o_fen_neblina
+    - o_fen_tormenta
+    - o_fen_lluvia
+    - o_fen_nieve
+    - o_tiene_tempo
+    - o_horas_desde_obs
+    - d_viento_kt
+    - d_visibilidad_m
+    - d_techo_ft
+    - d_fen_niebla
+    - d_fen_tormenta
+    - d_fen_lluvia
+  categoricas:
+    - pais
+    - aerolinea
+    - o_categoria_vuelo
+
+modelo:
+  objetivo: y_demora15
+  max_iter: 50
+  reg_param: 0.01
+
+escalabilidad:
+  anio_base: 2024   # año que se usa en E2 y como base de la réplica
+  replicas: 10      # veces que se replica el año base en scale-test/
 
 spark:
   nombre_app: latam-bigdata
