@@ -1,0 +1,7 @@
+fecha_utc,escalon,motor,nodos,filas,segundos,etapas,executor_run_s,entrada_mb,shuffle_lectura_mb,spill_memoria_mb,spill_disco_mb,exito,nota,memoria_estimada_gb,memoria_disponible_gb,pico_rss_gb
+2026-11-25T08:40:33+00:00,E1 1 mes,spark,2,662509,21.77,9.0,64.51,71.2,367.5,0.0,0.0,True,,,,
+2026-11-25T08:40:33+00:00,E2 año 2024,spark,2,7976448,80.88,9.0,305.06,547.7,3391.6,0.0,0.0,True,,,,
+2026-11-25T08:40:33+00:00,E3 periodo completo,spark,2,23626998,192.02,9.0,751.12,1568.5,9812.8,0.0,0.0,True,,,,
+2026-11-25T08:40:33+00:00,E4 réplica 5x del año 2024,spark,2,39882240,309.98,9.0,1221.51,2621.9,16512.6,0.0,0.0,True,"datos replicados en scale-test/, solo para esta prueba",,,
+2026-11-25T08:40:33+00:00,E5 pandas 1 mes,pandas,1,662509,0.89,,,,,,,True,,0.21,3.09,0.75
+2026-11-25T08:40:33+00:00,E5 pandas año 2024,pandas,1,7976448,,,,,,,,False,no se ejecuta: la memoria estimada supera la mitad de la disponible,2.52,1.9,

@@ -1,0 +1,7 @@
+pais,particion,vuelos,pct_demora15,pct_con_clima,pct_con_red,pct_con_dia_anterior,pct_con_tasa_hist
+BR,test,948446,17.92,95.55,79.57,78.49,96.89
+BR,train,1337148,18.78,94.55,78.96,77.52,99.22
+BR,valid,468230,20.65,94.85,79.14,77.34,97.85
+US,test,6817315,21.75,98.51,80.49,84.65,99.52
+US,train,10057865,20.9,98.53,80.65,84.09,99.86
+US,valid,3531898,19.63,98.59,80.79,82.94,99.73

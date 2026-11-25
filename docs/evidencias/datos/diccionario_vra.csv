@@ -1,0 +1,13 @@
+columna,descripcion,ejemplo,pct_vacios,valores_distintos_aprox
+empresa,"Código ICAO de la aerolínea (TAM = LATAM Brasil, AZU = Azul, GLO = Gol)",AEA,0.0,139
+numero_voo,Número de vuelo,0057,0.0,11976
+codigo_di,Código de autorización del vuelo (0 = regular),0,0.0,10
+tipo_linha,"Tipo de línea: N nacional, I internacional, C carga, G otros",I,0.0,5
+origem,Código ICAO del aeropuerto de origen,LEMD,0.0,527
+destino,Código ICAO del aeropuerto de destino,SBGR,0.0,561
+partida_prevista,Salida programada (hora de Brasília),2025-01-29 19:55:00,3.1,362915
+partida_real,Salida real (hora de Brasília); 'null' si no voló,2025-01-29 20:45:00,4.03,1181611
+chegada_prevista,Llegada programada (hora de Brasília),2025-01-30 06:30:00,3.1,364122
+chegada_real,Llegada real (hora de Brasília); 'null' si no voló,2025-01-30 06:47:00,4.03,1202246
+situacao,Situación del vuelo: REALIZADO o CANCELADO,REALIZADO,0.0,2
+justificativa,Código de justificación de la demora o cancelación (casi siempre N/A),N/A,0.0,1

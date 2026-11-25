@@ -1,0 +1,172 @@
+{
+  "ejecucion_utc": "2026-11-25T08:39:57+00:00",
+  "objetivo": "y_demora15",
+  "periodo": [
+    "2023-01",
+    "2025-12"
+  ],
+  "particion_temporal": {
+    "train_fin": "2024-06",
+    "valid_fin": "2024-12"
+  },
+  "variables_numericas": [
+    "hora_local",
+    "dia_semana",
+    "mes",
+    "fin_de_semana",
+    "congestion_hora",
+    "congestion_dia",
+    "red_n_salidas",
+    "red_demora_media",
+    "red_frac_atrasadas",
+    "prev_dia_demora",
+    "prev_dia_conocido",
+    "tasa_hist_origen_hora",
+    "clima_disponible",
+    "o_viento_kt",
+    "o_rafaga_kt",
+    "o_visibilidad_m",
+    "o_techo_ft",
+    "o_temp_c",
+    "o_spread_t_td",
+    "o_presion_hpa",
+    "o_presion_tendencia_3h",
+    "o_fen_niebla",
+    "o_fen_neblina",
+    "o_fen_tormenta",
+    "o_fen_lluvia",
+    "o_fen_nieve",
+    "o_tiene_tempo",
+    "o_horas_desde_obs",
+    "d_viento_kt",
+    "d_visibilidad_m",
+    "d_techo_ft",
+    "d_fen_niebla",
+    "d_fen_tormenta",
+    "d_fen_lluvia"
+  ],
+  "variables_categoricas": [
+    "pais",
+    "aerolinea",
+    "o_categoria_vuelo"
+  ],
+  "peso_positivo": 3.843,
+  "umbrales_elegidos_en_valid": {
+    "modelo": 0.48,
+    "referencia": 0.185
+  },
+  "vuelos": {
+    "valid_US": 3531898,
+    "train_US": 10057865,
+    "test_US": 6817315,
+    "train_BR": 1337148,
+    "test_BR": 948446,
+    "valid_BR": 468230
+  },
+  "test": [
+    {
+      "segmento": "Total",
+      "modelo": "referencia",
+      "vuelos": 7765761,
+      "tasa_demora": 0.2128,
+      "auc_roc": 0.6537,
+      "auc_pr": 0.3148,
+      "precision": 0.28,
+      "recall": 0.7381,
+      "f1": 0.4059,
+      "pct_alertado": 0.5609,
+      "umbral": 0.185
+    },
+    {
+      "segmento": "Total",
+      "modelo": "regresion_logistica",
+      "vuelos": 7765761,
+      "tasa_demora": 0.2128,
+      "auc_roc": 0.6905,
+      "auc_pr": 0.389,
+      "precision": 0.3313,
+      "recall": 0.6152,
+      "f1": 0.4307,
+      "pct_alertado": 0.3951,
+      "umbral": 0.48
+    },
+    {
+      "segmento": "EE. UU.",
+      "modelo": "referencia",
+      "vuelos": 6817315,
+      "tasa_demora": 0.2175,
+      "auc_roc": 0.6543,
+      "auc_pr": 0.3177,
+      "precision": 0.2862,
+      "recall": 0.7451,
+      "f1": 0.4136,
+      "pct_alertado": 0.566,
+      "umbral": 0.185
+    },
+    {
+      "segmento": "EE. UU.",
+      "modelo": "regresion_logistica",
+      "vuelos": 6817315,
+      "tasa_demora": 0.2175,
+      "auc_roc": 0.6914,
+      "auc_pr": 0.3958,
+      "precision": 0.3351,
+      "recall": 0.6263,
+      "f1": 0.4366,
+      "pct_alertado": 0.4064,
+      "umbral": 0.48
+    },
+    {
+      "segmento": "Brasil (todas las aerolíneas)",
+      "modelo": "referencia",
+      "vuelos": 948446,
+      "tasa_demora": 0.1792,
+      "auc_roc": 0.6314,
+      "auc_pr": 0.2749,
+      "precision": 0.2312,
+      "recall": 0.6767,
+      "f1": 0.3447,
+      "pct_alertado": 0.5243,
+      "umbral": 0.185
+    },
+    {
+      "segmento": "Brasil (todas las aerolíneas)",
+      "modelo": "regresion_logistica",
+      "vuelos": 948446,
+      "tasa_demora": 0.1792,
+      "auc_roc": 0.6755,
+      "auc_pr": 0.3331,
+      "precision": 0.2963,
+      "recall": 0.5185,
+      "f1": 0.3771,
+      "pct_alertado": 0.3135,
+      "umbral": 0.48
+    },
+    {
+      "segmento": "LATAM Brasil",
+      "modelo": "referencia",
+      "vuelos": 298582,
+      "tasa_demora": 0.1896,
+      "auc_roc": 0.6439,
+      "auc_pr": 0.2714,
+      "precision": 0.2508,
+      "recall": 0.7026,
+      "f1": 0.3696,
+      "pct_alertado": 0.5313,
+      "umbral": 0.185
+    },
+    {
+      "segmento": "LATAM Brasil",
+      "modelo": "regresion_logistica",
+      "vuelos": 298582,
+      "tasa_demora": 0.1896,
+      "auc_roc": 0.6786,
+      "auc_pr": 0.3299,
+      "precision": 0.3227,
+      "recall": 0.4752,
+      "f1": 0.3843,
+      "pct_alertado": 0.2792,
+      "umbral": 0.48
+    }
+  ]
+}

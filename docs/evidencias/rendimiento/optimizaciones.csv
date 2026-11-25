@@ -1,0 +1,9 @@
+fecha_utc,nodos,optimizacion,variante,segundos,etapas,executor_run_s,entrada_mb,shuffle_lectura_mb,spill_memoria_mb,spill_disco_mb
+2026-11-25T08:40:33+00:00,2,O1 broadcast join,sort-merge (antes),20.15,4,61.88,57.0,101.7,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O1 broadcast join,broadcast (después),8.96,3,26.79,57.0,0.0,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O2 poda de particiones y columnas,lectura completa (antes),8.32,2,15.9,133.3,0.0,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O2 poda de particiones y columnas,con poda (después),2.11,2,0.38,0.5,0.0,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O3 cache,sin cache (antes),24.81,6,72.39,163.3,0.3,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O3 cache,con cache (después),21.62,9,70.47,483.7,0.3,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O4 repartition antes de la ventana,sin repartition (antes),20.48,2,71.28,111.6,268.4,0.0,0.0
+2026-11-25T08:40:33+00:00,2,O4 repartition antes de la ventana,con repartition (después),19.79,2,68.81,111.6,268.4,0.0,0.0

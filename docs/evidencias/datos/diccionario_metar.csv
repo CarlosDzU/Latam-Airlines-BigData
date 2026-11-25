@@ -1,0 +1,5 @@
+columna,descripcion,ejemplo,pct_vacios,valores_distintos_aprox
+aeropuerto,"Código del aeropuerto como aparece en los vuelos (ICAO en Brasil, IATA en EE. UU.)",PGV,0.0,449
+estacion_iem,Código de la estación en el archivo de IEM,PGV,0.0,437
+valid,Fecha y hora del reporte en UTC (AAAA-MM-DD HH:MM),2023-01-01 00:15,0.0,1241295
+metar,Texto completo del reporte METAR,KPGV 010015Z AUTO 23010KT 10SM BKN016 BKN022 OVC039 21/21 A2992 RMK AO2,0.0,14533700

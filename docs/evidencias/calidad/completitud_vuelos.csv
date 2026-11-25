@@ -1,0 +1,12 @@
+campo,US,BR
+aerolinea,100.0,100.0
+numero_vuelo,100.0,100.0
+origen,100.0,100.0
+destino,100.0,100.0
+salida_prog_utc,100.0,100.0
+salida_real_utc,98.68,95.85
+llegada_prog_utc,100.0,100.0
+llegada_real_utc,98.37,95.85
+demora_salida_min,98.68,95.85
+demora_llegada_min,98.37,95.85
+y_demora15,98.37,95.85

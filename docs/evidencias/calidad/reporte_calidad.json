@@ -1,0 +1,141 @@
+{
+  "ejecucion_utc": "2026-11-25T08:11:51+00:00",
+  "periodo": [
+    "2023-01",
+    "2025-12"
+  ],
+  "reglas": [
+    {
+      "regla": "Q1",
+      "descripcion": "Campos clave completos",
+      "tabla": "silver/vuelos",
+      "incumplen": 0,
+      "total": 23626998,
+      "pct_cumple": 100.0,
+      "umbral_pct": 100.0,
+      "critica": true,
+      "cumple": true
+    },
+    {
+      "regla": "Q2",
+      "descripcion": "Sin vuelos duplicados por clave natural",
+      "tabla": "silver/vuelos",
+      "incumplen": 0,
+      "total": 23626998,
+      "pct_cumple": 100.0,
+      "umbral_pct": 100.0,
+      "critica": true,
+      "cumple": true
+    },
+    {
+      "regla": "Q3",
+      "descripcion": "Vuelos operados con salida real informada",
+      "tabla": "silver/vuelos",
+      "incumplen": 0,
+      "total": 23221780,
+      "pct_cumple": 100.0,
+      "umbral_pct": 98.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q4",
+      "descripcion": "Demora de salida dentro de [-60, 1440] min",
+      "tabla": "silver/vuelos",
+      "incumplen": 8100,
+      "total": 23626998,
+      "pct_cumple": 99.966,
+      "umbral_pct": 99.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q5",
+      "descripcion": "Salida real no anterior en más de 60 min a la programada",
+      "tabla": "silver/vuelos",
+      "incumplen": 5673,
+      "total": 23221780,
+      "pct_cumple": 99.976,
+      "umbral_pct": 99.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q6",
+      "descripcion": "Llegada programada posterior a la salida programada",
+      "tabla": "silver/vuelos",
+      "incumplen": 342,
+      "total": 23626998,
+      "pct_cumple": 99.999,
+      "umbral_pct": 99.5,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q7",
+      "descripcion": "Fechas dentro del periodo configurado",
+      "tabla": "silver/vuelos",
+      "incumplen": 0,
+      "total": 23626998,
+      "pct_cumple": 100.0,
+      "umbral_pct": 100.0,
+      "critica": true,
+      "cumple": true
+    },
+    {
+      "regla": "Q8",
+      "descripcion": "Vuelos operados con etiqueta de demora",
+      "tabla": "silver/vuelos",
+      "incumplen": 0,
+      "total": 23168971,
+      "pct_cumple": 100.0,
+      "umbral_pct": 98.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q9-BR",
+      "descripcion": "Vuelos de BR con clima del origen a T-2 h",
+      "tabla": "silver/clima_horario",
+      "incumplen": 140548,
+      "total": 2760182,
+      "pct_cumple": 94.908,
+      "umbral_pct": 90.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q9-US",
+      "descripcion": "Vuelos de US con clima del origen a T-2 h",
+      "tabla": "silver/clima_horario",
+      "incumplen": 300055,
+      "total": 20461598,
+      "pct_cumple": 98.534,
+      "umbral_pct": 90.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q10",
+      "descripcion": "METAR con viento y visibilidad decodificados",
+      "tabla": "silver/metar_obs",
+      "incumplen": 89150,
+      "total": 14744836,
+      "pct_cumple": 99.395,
+      "umbral_pct": 95.0,
+      "critica": false,
+      "cumple": true
+    },
+    {
+      "regla": "Q11",
+      "descripcion": "Vuelos de EE. UU. con zona horaria del aeropuerto",
+      "tabla": "bronze/bts",
+      "incumplen": 181364,
+      "total": 20928579,
+      "pct_cumple": 99.133,
+      "umbral_pct": 99.0,
+      "critica": false,
+      "cumple": true
+    }
+  ]
+}
