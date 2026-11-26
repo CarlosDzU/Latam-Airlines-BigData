@@ -1,0 +1,8 @@
+columna,descripcion,ejemplo,pct_vacios,valores_distintos_aprox
+aeropuerto,Código del aeropuerto como aparece en los vuelos,SBGR,0.0,459
+estacion,Código de la estación METAR en IEM,SBGR,0.0,464
+nombre,Nombre de la estación,Sao Paulo,0.0,484
+pais,País (código ISO de 2 letras),BR,0.0,30
+latitud,Latitud en grados,-23.43208,0.0,461
+longitud,Longitud en grados,-46.46951,0.0,464
+zona_horaria,Zona horaria IANA (por ejemplo America/Sao_Paulo),America/Sao_Paulo,0.0,67

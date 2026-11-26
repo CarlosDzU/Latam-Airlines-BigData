@@ -144,7 +144,7 @@ modelo:
 
 escalabilidad:
   anio_base: 2024   # año que se usa en E2 y como base de la réplica
-  replicas: 10      # veces que se replica el año base en scale-test/
+  replicas: 5       # veces que se replica el año base en scale-test/
 
 spark:
   nombre_app: latam-bigdata

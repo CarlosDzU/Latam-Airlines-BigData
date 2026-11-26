@@ -1,0 +1,13 @@
+regla,descripcion,tabla,incumplen,total,pct_cumple,umbral_pct,critica,cumple
+Q1,Campos clave completos,silver/vuelos,0,23626998,100.0,100.0,True,True
+Q2,Sin vuelos duplicados por clave natural,silver/vuelos,0,23626998,100.0,100.0,True,True
+Q3,Vuelos operados con salida real informada,silver/vuelos,0,23221780,100.0,98.0,False,True
+Q4,"Demora de salida dentro de [-60, 1440] min",silver/vuelos,8100,23626998,99.966,99.0,False,True
+Q5,Salida real no anterior en más de 60 min a la programada,silver/vuelos,5673,23221780,99.976,99.0,False,True
+Q6,Llegada programada posterior a la salida programada,silver/vuelos,342,23626998,99.999,99.5,False,True
+Q7,Fechas dentro del periodo configurado,silver/vuelos,0,23626998,100.0,100.0,True,True
+Q8,Vuelos operados con etiqueta de demora,silver/vuelos,0,23168971,100.0,98.0,False,True
+Q9-BR,Vuelos de BR con clima del origen a T-2 h,silver/clima_horario,140548,2760182,94.908,90.0,False,True
+Q9-US,Vuelos de US con clima del origen a T-2 h,silver/clima_horario,300055,20461598,98.534,90.0,False,True
+Q10,METAR con viento y visibilidad decodificados,silver/metar_obs,89150,14744836,99.395,95.0,False,True
+Q11,Vuelos de EE. UU. con zona horaria del aeropuerto,bronze/bts,181364,20928579,99.133,99.0,False,True

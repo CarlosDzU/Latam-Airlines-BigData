@@ -1,0 +1,3 @@
+pais,leidas,sin_zona_horaria,sin_datos_clave,fuera_de_periodo,escritas,cancelados,desviados,atipicos,con_etiqueta,pct_demora15,pct_demora60,vuelos_latam,duplicadas
+BR,2972195,0,92242,31,2879784,119602,0,6358,2760182,18.78,4.0,845813,138
+US,20928579,181364,1,0,20747214,285616,52809,1742,20408789,20.97,7.45,0,0

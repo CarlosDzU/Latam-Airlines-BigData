@@ -1,0 +1,19 @@
+columna,descripcion,ejemplo,pct_vacios,valores_distintos_aprox
+FlightDate,Fecha del vuelo (local del origen),2023-07-02,0.0,1115
+Reporting_Airline,Código IATA de la aerolínea que reporta,9E,0.0,14
+Flight_Number_Reporting_Airline,Número de vuelo,4900,0.0,6378
+Tail_Number,Matrícula del avión (no se usa en el modelo),N307PQ,0.23,6787
+Origin,Código IATA del aeropuerto de origen,DTW,0.0,359
+Dest,Código IATA del aeropuerto de destino,DSM,0.0,359
+CRSDepTime,"Salida programada, hhmm en hora local del origen",0946,0.0,1435
+DepTime,"Salida real, hhmm en hora local del origen",0942,1.32,1452
+DepDelay,Demora de salida en minutos (negativa si salió antes),-4.00,1.32,2137
+CRSArrTime,"Llegada programada, hhmm en hora local del destino",1034,0.0,1443
+ArrTime,"Llegada real, hhmm en hora local del destino",1015,1.4,1452
+ArrDelay,Demora de llegada en minutos,-19.00,1.63,2188
+Cancelled,1 si el vuelo se canceló,0.00,0.0,2
+Diverted,1 si el vuelo se desvió a otro aeropuerto,0.00,0.0,2
+CRSElapsedTime,Duración programada en minutos,108.00,0.0,686
+Distance,Distancia en millas,533.00,0.0,1774
+CarrierDelay,Minutos de demora atribuidos a la aerolínea (se conocen después del vuelo),29.00,79.11,1969
+WeatherDelay,Minutos de demora atribuidos al clima (se conocen después del vuelo),0.00,79.11,1264
