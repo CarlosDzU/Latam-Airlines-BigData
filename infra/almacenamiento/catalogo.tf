@@ -57,6 +57,8 @@ resource "aws_glue_crawler" "lake" {
 
   s3_target {
     path = "s3://${aws_s3_bucket.lake.bucket}/gold/"
+    # Los modelos guardados (PipelineModel y umbrales) no son tablas
+    exclusions = ["modelos/**"]
   }
 
   schema_change_policy {
