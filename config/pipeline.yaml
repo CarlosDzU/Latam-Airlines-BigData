@@ -16,8 +16,27 @@ lake:
     silver_calidad: silver/_calidad
     gold_features: gold/features_salida
     gold_modelos: gold/modelos
+    gold_predicciones: gold/predicciones
+    gold_fact_vuelo: gold/fact_vuelo
+    gold_dim_fecha: gold/dim_fecha
+    gold_dim_aeropuerto: gold/dim_aeropuerto
+    gold_dim_aerolinea: gold/dim_aerolinea
+    gold_dim_ruta: gold/dim_ruta
+    gold_dim_condicion_clima: gold/dim_condicion_clima
+    gold_kpi_diario: gold/kpi_diario
+    gold_kpi_alerta_mensual: gold/kpi_alerta_mensual
+    gold_deriva: gold/monitoreo_deriva
+    gold_alertas_tr: gold/alertas_tiempo_real   # salida de la capa de velocidad (notebook 17)
+    stream_metar: stream/metar_llegadas         # carpeta donde "llegan" los METAR que lee el flujo
+    checkpoints: checkpoints                    # progreso y estado de las consultas de streaming
     scale_test: scale-test/vuelos_replica   # réplicas de la prueba de escalabilidad; nunca se usan en el análisis
     evidencias: evidencias
+
+# Catálogo de Glue y Athena (los crea infra/almacenamiento con el prefijo del proyecto)
+catalogo:
+  crawler: latam-bigdata-catalogo
+  base_datos: latam_bigdata
+  workgroup: latam-bigdata
 
 # Meses que se procesan y cómo se separan para entrenar y evaluar (nunca al azar)
 periodo:
@@ -141,6 +160,119 @@ modelo:
   objetivo: y_demora15
   max_iter: 50
   reg_param: 0.01
+
+# Modelo final (notebook 12): árboles para la alerta ámbar (15 min) y la roja (60 min)
+modelo_final:
+  objetivos: [y_demora15, y_demora60]
+  semilla: 42
+  # Fracción de vuelos por país que entra a train y a la búsqueda en valid. Brasil (el caso de negocio) entra
+  # completo; de EE. UU. basta una parte para aprender los patrones generales en 2 nodos de 8 GiB.
+  muestra_train: {BR: 1.0, US: 0.25}
+  muestra_valid: {BR: 1.0, US: 0.25}
+  grilla_rf: {numTrees: [60], maxDepth: [8, 12]}
+  grilla_gbt: {maxIter: [60], maxDepth: [5], stepSize: [0.1]}
+  max_bins: 64
+  # Modelo y umbral se eligen por el beneficio en US$ en valid (LATAM Brasil), con los costos de valor_negocio.
+  # Escenario de costos y fracción capturada con que se elige; las demás fracciones se reportan como sensibilidad.
+  escenario_seleccion: base
+  # 1.0 = toda la diferencia de Westminster (cota superior): la lista se diseña para el máximo valor alcanzable y
+  # el notebook 15 informa desde qué fracción se paga (punto de equilibrio).
+  fraccion_seleccion: 1.0
+  hubs: [SBGR, SBSP]
+  # Cierre del gobierno de EE. UU. (afectó el control de tránsito aéreo): se reporta con y sin ese periodo
+  cierre_gobierno_eeuu: ["2025-10-01", "2025-11-15"]
+
+# Valor de negocio (notebooks 12 y 15). Toda cifra lleva su fuente; el registro completo (cita, página, copia del
+# documento) está fuera del repo, en las fuentes del informe.
+valor_negocio:
+  linea_base:
+    otp_cirium_2025: 82.40
+    fuente_otp: >-
+      Cirium (2026, 2 de enero), The On-Time Performance Review 2025, pág. 5: LATAM Airlines puesto 7 global,
+      82,40 % de llegadas a tiempo (dentro de 15 min) en 580 707 vuelos.
+  # La decisión que se evalúa: a T-2 h el CCO REPROGRAMA con anticipación la salida de un vuelo alertado, anunciando
+  # un nuevo horario m minutos más tarde (m = umbral de la alerta: 15 min la ámbar, 60 min la roja; decisión
+  # metodológica). Esos m minutos pasan a ser demora PLANIFICADA; el resto de la demora real sigue siendo sorpresa.
+  minutos_reprogramacion: {ambar: 15, rojo: 60}
+  # Costo para la aerolínea de una demora en puerta. University of Westminster (2015), European airline delay cost
+  # reference values v4.1, EUROCONTROL. Euros de 2014 (pág. 7).
+  #  - estrategica_eur_hora: demora "anticipada y considerada con anticipación" (pág. 40, §2.1.1); sin costos de
+  #    pasajeros ni efecto en cadena (pág. 7, §8a). Tabla 9, pág. 7, por hora.
+  #  - tactica_eur: demora contra el horario, costo completo con efecto en cadena, por evento según su duración.
+  #    Tabla 26 (base, pág. 11), H1 (bajo) y H2 (alto) (pág. 20).
+  # https://www.eurocontrol.int/sites/default/files/publication/files/european-airline-delay-cost-reference-values-final-report-4-1.pdf
+  costos_westminster:
+    minutos: [5, 15, 30, 60, 90, 120, 180, 240, 300]
+    aviones:
+      A319:
+        estrategica_eur_hora: {bajo: 450, base: 810, alto: 1430}
+        tactica_eur:
+          bajo: [20, 170, 630, 2720, 7060, 13300, 20100, 29470, 41760]
+          base: [70, 440, 1600, 7320, 20040, 37850, 51240, 69420, 93180]
+          alto: [120, 730, 2870, 14630, 40910, 80010, 99660, 126210, 160710]
+      A320:
+        estrategica_eur_hora: {bajo: 480, base: 900, alto: 1580}
+        tactica_eur:
+          bajo: [20, 190, 720, 3140, 8160, 15360, 23130, 33780, 47600]
+          base: [80, 500, 1820, 8350, 22920, 43250, 58420, 78890, 105380]
+          alto: [130, 820, 3260, 16650, 46660, 91140, 113350, 143190, 181640]
+      A321:
+        estrategica_eur_hora: {bajo: 590, base: 1050, alto: 1820}
+        tactica_eur:
+          bajo: [30, 240, 880, 3820, 9950, 18730, 28090, 40790, 57110]
+          base: [100, 580, 2160, 10010, 27580, 51990, 70060, 94250, 125240]
+          alto: [140, 950, 3860, 19960, 56170, 109440, 135940, 171250, 216350]
+  # Peso de cada avión: flota de corto alcance de LATAM al 31-dic-2025, que es "formada exclusivamente por aviones de
+  # la familia A320". LATAM Airlines Group, Form 20-F 2025, págs. 41 y 55. El A320neo y el A321neo se cuentan con su
+  # versión ceo porque Westminster no los trae.
+  flota_corto_alcance: {A319: 39, A320: 186, A321: 66}
+  # Conversión de euros de 2014 a dólares del año de test, con series oficiales:
+  #  - Eurostat prc_hicp_aind (zona euro, CP00, promedio anual, 2015=100);
+  #  - BCE EXR A.USD.EUR.SP00.A (dólares por euro, promedio anual).
+  conversion:
+    anio_precios: 2025
+    hicp_eurostat: {2014: 99.81, 2025: 128.75}
+    usd_por_eur_bce: {2025: 1.1299831}
+  # Escenarios = los tres escenarios de costo del propio estudio de Westminster (no son supuestos propios)
+  escenarios: [bajo, base, alto]
+  # Fracción de la diferencia (sorpresa - planificada) que se captura avisando a T-2 h. Ninguna fuente la mide, así
+  # que NO se fija: el notebook 15 informa el punto de equilibrio f* y el beneficio para cada fracción de la grilla.
+  fracciones_captura: [0.25, 0.5, 0.75, 1.0]
+  # Referencias de costo por minuto (no entran al cálculo; contexto del informe, con fuente verificada)
+  referencias_costo_minuto:
+    brasil_operacional:
+      usd: 29.66
+      fuente: >-
+        Bendinelli, Bettini y Oliveira (2015), "Os custos diretos de voos que chegam atrasados em aeroportos
+        brasileiros", Anais do XIV SITRAER, ITA, págs. 218-230. Calculado a partir de la Tabla 2 (pág. 228), fila 2010:
+        US$ 165 408 206 de costo operacional / 7 706 336 minutos = US$ 21,46 por minuto (dólares de 2013). Llevado a
+        dólares de 2025 con el BLS CPI-U CUUR0000SA0 (promedio anual 321,943 / 232,957).
+        https://repositorio.usp.br/bitstreams/30d65449-452b-492d-9523-fe90cabb9b80
+    a4a_block_2025:
+      usd: 98.41
+      fuente: >-
+        Airlines for America (2026), U.S. Passenger Carrier Delay Costs, año calendario 2025, con datos del DOT
+        Form 41: tripulación 37,01, combustible 29,34, mantenimiento 18,35, propiedad 9,76 y otros 3,95.
+        https://www.airlines.org/dataset/u-s-passenger-carrier-delay-costs/
+  # Sensibilidad (no se elige una): cuántos vuelos por aeropuerto y día alcanzaría a revisar el CCO. LATAM no publica
+  # la capacidad de su CCO, así que la regla principal es el umbral y estas K son solo una grilla de análisis.
+  capacidad_cco_sensibilidad: [5, 10, 20]
+  producto_principal: ambar
+  regla_principal: umbral
+  producto_complementario: rojo
+  regla_complementaria: umbral
+  bootstrap: {repeticiones: 1000, semilla: 42, confianza: 0.95}
+
+# Capa de velocidad (notebook 17): alertas con el METAR que va llegando
+streaming:
+  aeropuerto_demo: SBGR      # aeropuerto con el que se elige el día de la demostración
+  dia_demo: auto             # "auto" lo elige con los datos; o una fecha AAAA-MM-DD del periodo de test
+  zona_horaria: America/Sao_Paulo
+  marca_agua: "2 hours"      # un METAR que llega más de 2 h tarde ya no sirve para la alerta de T-2 h
+  intervalo_continuo: "15 seconds"   # demostración; en operación sería "10 minutes"
+  pausa_reproduccion_seg: 20         # cada archivo representa una hora de observaciones
+  horas_previas: 6           # horas de METAR antes del primer vuelo, para tener clima vigente desde el inicio
+  particiones_shuffle: 4
 
 escalabilidad:
   anio_base: 2024   # año que se usa en E2 y como base de la réplica

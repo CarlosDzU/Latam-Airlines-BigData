@@ -46,7 +46,8 @@ Los datos completos no se versionan: los notebooks de ingesta los descargan de l
 | `scripts/` | `tunel.sh`: túneles hacia Jupyter y la interfaz de Spark |
 | `tests/` | Reservada para las pruebas (aún no hay ninguna) |
 | `data/muestra/` | Reservada para una muestra pequeña de los datos reales (aún vacía) |
-| `docs/` | Evidencias que generan los notebooks, en `docs/evidencias/` |
+| `docs/` | Evidencias que generan los notebooks, en `docs/evidencias/` (Unidad 2: `modelo/`, `tablero/`, `valor/`, `monitoreo/` y `tiempo_real/`) |
+| `tablero/` | Consultas de Athena con las que el tablero lee los indicadores de gold |
 
 ## Notebooks
 
@@ -63,6 +64,12 @@ Los datos completos no se versionan: los notebooks de ingesta los descargan de l
 | `09_Analisis-Exploratorio` | Preguntas de negocio respondidas con gráficos |
 | `10_Modelo-Base` | Modelo base frente a una referencia trivial |
 | `11_Rendimiento-Escalabilidad` | Optimizaciones medidas y prueba de escalabilidad |
+| `12_Modelo-Final` | Random Forest y GBT para la alerta ámbar (15 min) y roja (60 min); modelo y umbral elegidos por el beneficio en US$ de reprogramar con anticipación, comparado con las referencias |
+| `13_Predicciones-Lote` | Aplica los modelos guardados y publica el nivel de alerta de cada vuelo (capa por lotes) |
+| `14_Modelo-Estrella-KPI` | Tabla de hechos, dimensiones e indicadores K1–K4 para el tablero; actualiza el catálogo de Glue |
+| `15_Valor-Negocio` | ¿Conviene reprogramar con anticipación? Línea base y costo de las demoras de 2025, costo evitable frente a la tabla de tasas con las mismas alertas, punto de equilibrio y trazabilidad (costos de University of Westminster, 2015, para EUROCONTROL) |
+| `16_Monitoreo-Deriva` | Deriva de las variables (PSI) y valor mensual de la alerta frente a la tabla de tasas: cuándo reentrenar |
+| `17_Alertas-Tiempo-Real` | Capa de velocidad con Spark Structured Streaming: alertas a medida que llega el METAR |
 
 ---
 
@@ -192,7 +199,18 @@ cd ~/Latam-Airlines-BigData
 git pull
 ```
 
-Luego abre los notebooks de `notebooks/` **en orden** (01 → 11) y ejecuta sus celdas de arriba abajo. Los de ingesta (01 a 03) no repiten las descargas de vuelos y METAR que ya están en bronze, así que pueden volver a ejecutarse sin duplicar datos; la ficha de aeropuertos del 03 sí se consulta completa en cada ejecución.
+Luego abre los notebooks de `notebooks/` **en orden** (01 → 17) y ejecuta sus celdas de arriba abajo. Los de ingesta (01 a 03) no repiten las descargas de vuelos y METAR que ya están en bronze, así que pueden volver a ejecutarse sin duplicar datos; la ficha de aeropuertos del 03 sí se consulta completa en cada ejecución.
+
+Los notebooks de la Unidad 2 dependen unos de otros:
+
+| Orden | Notebook | Necesita |
+| :---- | :---- | :---- |
+| 1 | `12_Modelo-Final` | `gold/features_salida` (08) y el modelo base (10). Guarda los modelos y los umbrales en `gold/modelos/` |
+| 2 | `13_Predicciones-Lote` | Los modelos del 12. Escribe `gold/predicciones` |
+| 3 | `14_Modelo-Estrella-KPI`, `15_Valor-Negocio` y `16_Monitoreo-Deriva` | Las predicciones del 13; entre ellos no dependen |
+| 4 | `17_Alertas-Tiempo-Real` | Los modelos y umbrales del 12. El parámetro `MODO` elige `"continuo"` (Spark revisa cada pocos segundos si llegó un METAR) o `"una_vez"` (procesa lo que haya y termina) |
+
+Los costos que usan el 12, el 15 y el 16 están en `config/pipeline.yaml` (`valor_negocio`), cada uno con su fuente: University of Westminster (2015) para EUROCONTROL, la flota del Form 20-F 2025 de LATAM, y Eurostat y el Banco Central Europeo para pasar de euros de 2014 a dólares.
 
 Para guardar en GitHub un notebook ejecutado desde el clúster (el nodo es nuevo en cada sesión, así que hay que configurar la identidad de git y autenticarse de nuevo):
 
